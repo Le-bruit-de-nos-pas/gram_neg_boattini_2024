@@ -77,9 +77,18 @@ summary_table
 ````
 
 
-# Positive >2 cultures  || +50%
-## Summary Stats + Fisher's Exat Test | Wilcoxon/Mann-Whitney Test
 
+# Summary Stats + Fisher's Exat Test | Wilcoxon/Mann-Whitney Test
+
+
+
+`
+Summary statistics including mean, standard deviation (SD), median, interquartile range (IQR), proportion, and standard error (SE) were calculated to provide insights into the distribution and variability of the data.
+For binary variables, proportions of patients with specific events were calculated, along with their corresponding standard errors. We employed Fisher's exact test to assess the association between binary variables and outcomes. 
+For continuous variables, we used the Mann-Whitney U test to compare distributions between groups based on outcome status.
+`
+
+## Positive >2 cultures  || +50%
 
 ```python
 df_cult_pos = df[df['Positive_2culture_50perc'] == 1] # 43 out of 63
@@ -142,9 +151,10 @@ for result in binary_results:
 ````
 
 
-# In-Hospital Mortality
-## Summary Stats + Fisher's Exat Test | Wilcoxon/Mann-Whitney Test
+# Summary Stats + Fisher's Exat Test | Wilcoxon/Mann-Whitney Test
 
+
+## In-Hospital Mortality
 
 
 ```python
@@ -251,4 +261,19 @@ shap.plots.beeswarm(shap_values)
 shap.plots.beeswarm(shap_values.abs, color="shap_red")
 ````
 
+
+```python
+shap.plots.heatmap(shap_values)
+````
+
+` 
+(a) Beeswarm Plot of SHAP Values: Beeswarm plot illustrateing the distribution of SHAP (SHapley Additive exPlanations) values for each feature in the dataset. Each dot represents a feature value for a specific patient, with the position along the x-axis indicating the magnitude of the SHAP value. The color of each dot indicates the corresponding feature value, providing insight into the relationship between feature values and their impact on model predictions. Features with wider distributions and greater dispersion of SHAP values suggest higher variability and importance in the model's decision-making process. 
+Redder dots on the right side of the plot indicate that being positive for that feature or experiencing higher values on it increases the predicted probability of death. Redder dots on the left side indicate the opposite (lower chances of dying).
+(b) Heatmap of SHAP Values:  Heatmap illustrating the SHAP (SHapley Additive exPlanations) values for the top features impacting the model's mortality prediction scores.  Each row corresponds to a feature in the dataset, and each column represents a patient sample. 
+Patient samples are ordered using hierarchical clustering by their explanation similarity, resulting in samples with closer model outputs for the same reason getting grouped together.
+The color intensity indicates the magnitude and direction of the feature's impact on the model output: red indicates positive impact (increasing the predicted likelihood of death), while blue indicates negative impact (decreasing the predicted likelihood of death).  
+A feature's importance can be inferred from the range and variability of its SHAP values across samples.
+Features with higher absolute SHAP values exert a greater influence on the model predictions. Only the top 9 features are herein individually depicted.
+The output of the model is shown above the heatmap matrix as a line plot centered around the explaination’s base valu and the global importance of each model input shown as a bar plot on the right hand side of the plot.
+`
 
