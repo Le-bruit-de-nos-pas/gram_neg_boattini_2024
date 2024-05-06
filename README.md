@@ -297,5 +297,5 @@ The output of the model is shown above the heatmap matrix as a line plot centere
 
 
 `
-There are some trends, whereby patients who did die tend to have received combination therapy as oposed to monotherapy, were more comorbid (most notably in regard to diabetes). However, by far, the only features strongly predictive of in-hospital mortality seem to be time from admission to BSI and total length of stay.
+There are some trends, whereby patients who did die tend to have received combination therapy as oposed to monotherapy, were more comorbid (most notably in regard to diabetes). However, by far, the only features strongly predictive of in-hospital mortality seem to be time from admission to BSI and total length of stay. But this is, of course, not very helpful. The longer a patient stays on the hospital the more likely he/she is to died at the hospital.
 `
