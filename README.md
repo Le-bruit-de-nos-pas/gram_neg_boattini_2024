@@ -295,3 +295,7 @@ The output of the model is shown above the heatmap matrix as a line plot centere
 (c) Force plots with individual patient examples, breaking down the contribution of each feature to the prediction of a given patient (3 random patients with a high/low predicted score shown). Scores are on a log odds scale. Probabilities can be easily infered as probability = exp(log-odds)/(1+exp(log-odds)).
 `
 
+
+`
+There are so trends, whereby patients who did die tend to have received combination therapy as oposed to monotherapy, were more comorbid (most notably in regard to diabetes). However, by far, the only features strongly predictive of in-hospital mortality seem to be time from admission to BSI and total length of stay.
+`
