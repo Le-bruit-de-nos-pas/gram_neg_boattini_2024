@@ -1,4 +1,4 @@
-# Paulo Bastos   May 5th 2024 
+# Paulo Bastos   May 3rd 2024 
 
 ```python
 import pandas as pd
@@ -176,6 +176,15 @@ binary_results = []
 numeric_results = []
 ````
 
+`
+Features containing only zeros have been removed as they provided no addiitonal information.
+`
+`
+Mortality at 14 and 30 days post hospitalization has been ignored.
+`
+
+
+
 ```python
 for col in df.columns:
     if col not in exclude_cols:
@@ -243,6 +252,10 @@ shap_values = explainer(X)
 ````
 
 
+`
+We employed XGBoost as an explanatory model to rank and identify relative feature importance, using  SHAP values as a proxy for feature importance measured at the local data point level. SHAP values are reported as log odds.
+`
+
 ```python
 shap_values.display_data = X.values
 ````
@@ -251,20 +264,24 @@ shap_values.display_data = X.values
 ```python
 shap.plots.bar(shap_values)
 ````
+
 ```python
 shap.plots.bar(shap_values.abs.max(0))
 ````
+
 ```python
 shap.plots.beeswarm(shap_values)
 ````
-```python
-shap.plots.beeswarm(shap_values.abs, color="shap_red")
-````
-
 
 ```python
 shap.plots.heatmap(shap_values)
 ````
+
+```python
+shap.initjs()
+shap.force_plot(shap_values[10])
+````
+
 
 ` 
 (a) Beeswarm Plot of SHAP Values: Beeswarm plot illustrateing the distribution of SHAP (SHapley Additive exPlanations) values for each feature in the dataset. Each dot represents a feature value for a specific patient, with the position along the x-axis indicating the magnitude of the SHAP value. The color of each dot indicates the corresponding feature value, providing insight into the relationship between feature values and their impact on model predictions. Features with wider distributions and greater dispersion of SHAP values suggest higher variability and importance in the model's decision-making process. 
@@ -275,5 +292,6 @@ The color intensity indicates the magnitude and direction of the feature's impac
 A feature's importance can be inferred from the range and variability of its SHAP values across samples.
 Features with higher absolute SHAP values exert a greater influence on the model predictions. Only the top 9 features are herein individually depicted.
 The output of the model is shown above the heatmap matrix as a line plot centered around the explaination’s base valu and the global importance of each model input shown as a bar plot on the right hand side of the plot.
+(c) Force plots with individual patient examples, breaking down the contribution of each feature to the prediction of a given patient (3 random patients with a high/low predicted score shown). Scores are on a log odds scale. Probabilities can be easily infered as probability = exp(log-odds)/(1+exp(log-odds)).
 `
 
