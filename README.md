@@ -297,5 +297,156 @@ The output of the model is shown above the heatmap matrix as a line plot centere
 
 
 `
-There are some trends, whereby patients who did die tend to have received combination therapy as oposed to monotherapy, were more comorbid (most notably in regard to diabetes). However, by far, the only features strongly predictive of in-hospital mortality seem to be time from admission to BSI and total length of stay. But this is, of course, not very helpful. The longer a patient stays on the hospital the more likely he/she is to died at the hospital.
+There are some trends, whereby patients who did die tend to have received combination therapy as oposed to monotherapy, were more comorbid (most notably in regard to diabetes). However, by far, the only features strongly predictive of in-hospital mortality seem to be time from admission to BSI and total length of stay. 
+
+But this is, of course, not very helpful. The longer a patient stays on the hospital, the more likely he/she is to die at the hospital.
+`
+
+
+# Principal Component Analysis
+
+```python
+df = pd.read_csv('../data/neg_bacilli_turin_2024.txt', delimiter='\t')
+df.fillna(0, inplace=True)
+````
+
+
+```python
+columns_to_drop = ['pat_id', 'Amoxicillin_clavulanate_including', 'Metronidazole_including', 'Mortality_14_days', 'Mortality_30_days', 'LOS_days']
+df = df.drop(columns=columns_to_drop)
+````
+
+
+```python
+numerical_features = df.select_dtypes(include=['float64', 'int64'])
+numerical_features = numerical_features.drop(columns=['Mortality_hospital'])
+
+binary_numerical_features = [col for col in numerical_features.columns if numerical_features[col].nunique() == 2]
+
+non_binary_numerical_features = numerical_features.drop(columns=binary_numerical_features)
+
+scaler = StandardScaler()
+
+scaled_numerical_features = scaler.fit_transform(numerical_features)
+````
+
+
+```python
+df[numerical_features.columns] = scaled_numerical_features
+df.shape
+````
+
+
+```python
+numerical_features = df.drop(columns=['Mortality_hospital']).select_dtypes(include=['float64', 'int64'])
+numerical_features.shape
+````
+
+```python
+pca = PCA(n_components=0.99) 
+pca.fit(numerical_features)
+````
+
+```python
+principal_components = pca.transform(numerical_features)
+principal_components_df = pd.DataFrame(data=principal_components, 
+                                       columns=[f'PC{i}' for i in range(1, pca.n_components_ + 1)])
+````
+
+```python
+loadings = pca.components_
+loadings_df = pd.DataFrame(loadings, columns=numerical_features.columns)
+````
+
+```python
+for i, component in enumerate(loadings_df.iterrows(), start=1):
+    print(f"Principal Component {i} Loadings:")
+    print(component)
+    print("\n")
+````
+
+
+```python
+plt.figure(figsize=(12, 16))
+sns.heatmap(loadings_df.T, cmap='coolwarm', annot=True, fmt=".1f", cbar=False)
+plt.title('Principal Component Loadings')
+plt.xlabel(None)  
+plt.ylabel(None)  
+plt.show()
+````
+
+
+```python
+cumulative_variance_ratio = np.cumsum(pca.explained_variance_ratio_)
+
+plt.figure(figsize=(10, 6))
+plt.plot(range(1, len(cumulative_variance_ratio) + 1), cumulative_variance_ratio, marker='o', linestyle='-')
+plt.title('Cumulative Explained Variance Ratio')
+plt.xlabel('Number of Principal Components')
+plt.ylabel('Cumulative Explained Variance Ratio')
+plt.xticks(range(1, len(cumulative_variance_ratio) + 1))
+plt.grid(True)
+plt.show()
+````
+
+
+```python
+principal_components_df
+
+y = df['Mortality_hospital']
+
+correlation_with_y = principal_components_df.apply(lambda col: col.corr(y))
+
+````
+
+
+```python
+correlation_with_y_sorted = correlation_with_y.abs().sort_values(ascending=False)
+
+print("Correlation with Output Variable (Absolute Values):")
+print(correlation_with_y_sorted)
+````
+
+
+
+```python
+pca_with_y = pd.concat([principal_components_df, y], axis=1)
+
+mean_loadings_by_y = pca_with_y.groupby('Mortality_hospital').mean()
+
+print("Mean Loadings by Output Variable Group:")
+print(mean_loadings_by_y)
+````
+
+
+
+```python
+mean_loadings_by_y.index = mean_loadings_by_y.index.map({0: 'No', 1: 'Yes'})
+
+
+plt.figure(figsize=(25, 1))
+sns.heatmap(mean_loadings_by_y, cmap='RdGy', annot=True, fmt=".1f", cbar=True)
+plt.title('Mean Loadings by In-hospital Mortality Status')
+plt.xlabel('Principal Components')
+plt.ylabel('In-hospital Mortality')
+plt.show()
+````
+
+
+
+
+```python
+top_features_by_pc = {}
+
+for pc in loadings_df.index:
+    top_features_by_pc[pc] = loadings_df.loc[pc].abs().nlargest(5).index.tolist()
+
+for pc, features in top_features_by_pc.items():
+    print(f"Principal Component {pc}: {features}")
+
+````
+
+
+`
+Variance is spread too thin throughout. Upon varimax roation the loadings are very weak and even the more modest ones (0.3 - 0.4 max) have nothing to do with the mortality-related features which don't appear until PC +30. Which reinforces that the patients are not significantly different at baseline. It is probably just a bias due to longer  hospitalization times.
 `
