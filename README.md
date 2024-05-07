@@ -343,7 +343,7 @@ numerical_features.shape
 ````
 
 ```python
-pca = PCA(n_components=0.99) 
+pca = PCA(n_components=0.75) 
 pca.fit(numerical_features)
 ````
 
@@ -367,8 +367,10 @@ for i, component in enumerate(loadings_df.iterrows(), start=1):
 
 
 ```python
-plt.figure(figsize=(12, 16))
-sns.heatmap(loadings_df.T, cmap='coolwarm', annot=True, fmt=".1f", cbar=False)
+loadings_df.index = loadings_df.index + 1
+
+plt.figure(figsize=(9, 16))
+sns.heatmap(loadings_df.T, cmap='RdGy', annot=False, fmt=".1f", cbar=True)
 plt.title('Principal Component Loadings')
 plt.xlabel(None)  
 plt.ylabel(None)  
@@ -379,13 +381,15 @@ plt.show()
 ```python
 cumulative_variance_ratio = np.cumsum(pca.explained_variance_ratio_)
 
+
 plt.figure(figsize=(10, 6))
-plt.plot(range(1, len(cumulative_variance_ratio) + 1), cumulative_variance_ratio, marker='o', linestyle='-')
+plt.plot(range(len(cumulative_variance_ratio)), cumulative_variance_ratio, marker='o', linestyle='-', color='black', markerfacecolor='none')
 plt.title('Cumulative Explained Variance Ratio')
 plt.xlabel('Number of Principal Components')
 plt.ylabel('Cumulative Explained Variance Ratio')
-plt.xticks(range(1, len(cumulative_variance_ratio) + 1))
-plt.grid(True)
+plt.xticks(range(len(cumulative_variance_ratio)), range(1, len(cumulative_variance_ratio) + 1))
+plt.yticks(np.arange(0, 1.1, 0.1))  # Start y-axis from 0 and include increments of 0.1
+plt.grid(False)
 plt.show()
 ````
 
