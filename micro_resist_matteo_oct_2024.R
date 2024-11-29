@@ -1691,17 +1691,20 @@ top_features <- mean_shap_df %>%  select(Feature)
 
 
 
-ploted_shap <- mean_shap_df %>% head(50) %>% 
+ploted_shap <- mean_shap_df %>% head(20) %>% 
   mutate(Feature=str_replace_all(Feature, "Benzilpenicillin", "Benzylpenicillin")) %>%
   mutate(Feature=str_replace_all(Feature, "Lactobacillus_rhamnosus", "Lacticaseibacillus_rhamnosus")) %>%
   ggplot(aes(x = reorder(Feature, Importance), y = Importance)) +
-  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_bar(stat = "identity", fill = "#183555") +
   coord_flip() + # Flip the plot for better readability
   theme_minimal() +
-  labs(title = "Mean Absolute SHAP Values [Top 50 Only!]", x = "Feature \n ", y = " \nMean SHAP Value") +
+  labs(title = "Mean Absolute SHAP Values [Top 20 Only!]", x = "Feature \n ", y = " \nMean SHAP Value") +
   theme(axis.text.x = element_text(angle = 20, hjust = 1))
 
-ggsave(file="ploted_shap.svg", plot=ploted_shap, width=10, height=10)
+ggsave(file="ploted_shap.svg", plot=ploted_shap, width=7, height=6)
+
+
+
 
 
 
@@ -1731,6 +1734,31 @@ head(final_results)
 data.frame(final_results %>% spread(key=peds, value=mean_value)) %>%
   mutate(X0=round(100*X0,2)) %>%
   mutate(X1=round(100*X1,2)) %>% filter(abs(X1-X0)>20)
+
+
+
+results_list <- list()
+
+# Loop through each feature in 'top_features' dataframe
+for (feature in top_features$Feature) {
+  
+  # Count the number of rows for each group (peds)
+  count_data <- my_data %>%
+    group_by(peds) %>% 
+    summarise(row_count = sum(!is.na(get(feature)))) # Count non-NA rows for the feature
+  
+  # Optionally, add the feature name to the result dataframe
+  count_data$Feature <- feature
+  
+  # Append the result to the list
+  results_list[[feature]] <- count_data
+}
+
+# Combine the list of results into one dataframe
+final_results <- bind_rows(results_list)
+
+final_results <- final_results %>% spread(key = peds, value=row_count)
+fwrite(final_results, "Counts_samples_peds_vs_adults_specieslevel.csv")
 
 
 # ------------------
@@ -1846,16 +1874,16 @@ top_features <- mean_shap_df %>%  select(Feature)
 
 
 
-ploted_shap <- mean_shap_df %>% head(50) %>% 
+ploted_shap <- mean_shap_df %>% head(20) %>% 
   mutate(Feature=str_replace_all(Feature, "Benzilpenicillin", "Benzylpenicillin")) %>%
   ggplot(aes(x = reorder(Feature, Importance), y = Importance)) +
-  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_bar(stat = "identity", fill = "#183555") +
   coord_flip() + # Flip the plot for better readability
   theme_minimal() +
-  labs(title = "Mean Absolute SHAP Values [Top 50 Only!]", x = "Feature \n ", y = " \nMean SHAP Value") +
+  labs(title = "Mean Absolute SHAP Values [Top 20 Only!]", x = "Feature \n ", y = " \nMean SHAP Value") +
   theme(axis.text.x = element_text(angle = 20, hjust = 1))
 
-ggsave(file="ploted_shap.svg", plot=ploted_shap, width=10, height=10)
+ggsave(file="ploted_shap.svg", plot=ploted_shap, width=6, height=6)
 
 
 
@@ -1868,6 +1896,7 @@ for (feature in top_features$Feature) {
   mean_data <- my_data %>%
     group_by(peds) %>% 
     summarise(mean_value = mean(get(feature), na.rm = TRUE))
+  
   
   # Optionally, add the feature name to the result dataframe
   mean_data$Feature <- feature
@@ -1885,6 +1914,32 @@ head(final_results)
 data.frame(final_results %>% spread(key=peds, value=mean_value)) %>%
   mutate(X0=round(100*X0,2)) %>%
   mutate(X1=round(100*X1,2)) %>% filter(abs(X1-X0)>20)
+
+
+
+results_list <- list()
+
+# Loop through each feature in 'top_features' dataframe
+for (feature in top_features$Feature) {
+  
+  # Count the number of rows for each group (peds)
+  count_data <- my_data %>%
+    group_by(peds) %>% 
+    summarise(row_count = sum(!is.na(get(feature)))) # Count non-NA rows for the feature
+  
+  # Optionally, add the feature name to the result dataframe
+  count_data$Feature <- feature
+  
+  # Append the result to the list
+  results_list[[feature]] <- count_data
+}
+
+# Combine the list of results into one dataframe
+final_results <- bind_rows(results_list)
+
+final_results <- final_results %>% spread(key = peds, value=row_count)
+fwrite(final_results, "Counts_samples_peds_vs_adults_gramstainlevel.csv")
+
 
 
 # ------------------
